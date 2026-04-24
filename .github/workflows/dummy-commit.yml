@@ -1,0 +1,32 @@
+name: Dummy Commit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture current HEAD
+        id: head
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Append to dummy.txt
+        run: echo "dummy commit $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> dummy.txt
+
+      - name: Update SRCREV in bb recipe
+        run: |
+          RECIPE="recipes-example/yocto-cache-test/yocto-cache-test_git.bb"
+          sed -i "s/^SRCREV = .*/SRCREV = \"${{ steps.head.outputs.sha }}\"/" "$RECIPE"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dummy.txt recipes-example/
+          git commit -m "chore: dummy commit to advance SRCREV"
+          git push
