@@ -3,6 +3,9 @@ name: Dummy Commit
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   bump:
     runs-on: ubuntu-latest
